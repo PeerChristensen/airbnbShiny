@@ -2,9 +2,10 @@
 
 library(tidyverse)
 library(shiny)
+library(ggthemes)
 
-df  <- read_csv("listings.csv") 
-zip <- df %>% group_by(zipcode) %>% count() %>% filter(n >= 100) %>% drop_na() %>% pull(zipcode) %>% factor()
+df  <- read_csv("avm_all.csv") 
+municipality <- df %>% pull(MUNI_NAME) %>% factor()
 
 # Define UI for application that plots features of movies
 ui <- fluidPage(
@@ -14,14 +15,14 @@ ui <- fluidPage(
     
     # Inputs
     sidebarPanel(
-
-      selectInput(inputId = "zipcode",
-                  label   = "Zip code:",
-                  choices = zip)),
+      
+      selectInput(inputId = "muni",
+                  label   = "Municipality:",
+                  choices = municipality)),
     
     # Outputs
     mainPanel(
-      plotOutput(outputId = "densityplot")
+      plotOutput(outputId = "scatterplot")
     )
   )
 )
@@ -36,15 +37,13 @@ server <- function(input, output) {
     
     #data <- df %>%
     #  filter(price %in% output$range)
-    df <- read_csv("listings.csv") %>%
-      mutate(price = parse_number(price),
-             zipcode = factor(zipcode)) %>%
-      filter(price < 5000) %>%
-      select(price,zipcode) %>%
-      filter(zipcode == input$zipcode)
+    df <- read_csv("avm_all.csv") %>%
+      select(estprice,lastprice) %>%
+      filter(MUNI_NAME == input$muni)
     
-    ggplot(data = df, aes_string(x = df$price)) +
-      geom_density()
+    ggplot(data = df, aes(x = df$estprice,y = df$lastprice)) +
+      geom_point(colour = "steelblue", alpha = .01) +
+      
   })
 }
 
