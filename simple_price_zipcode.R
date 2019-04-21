@@ -3,8 +3,8 @@
 library(tidyverse)
 library(shiny)
 
-df  <- read_csv("listings.csv") 
-zip <- df %>% group_by(zipcode) %>% count() %>% filter(n >= 100) %>% drop_na() %>% pull(zipcode) %>% factor()
+# df  <- read_csv("listings.csv") 
+# zip <- df %>% group_by(zipcode) %>% count() %>% filter(n >= 100) %>% drop_na() %>% pull(zipcode) %>% factor()
 
 # Define UI for application that plots features of movies
 ui <- fluidPage(
@@ -36,13 +36,16 @@ server <- function(input, output) {
     
     #data <- df %>%
     #  filter(price %in% output$range)
-    df <- read_csv("listings.csv") %>%
+    df  <- read_csv("listings.csv") 
+    zip <- df %>% group_by(zipcode) %>% count() %>% filter(n >= 100) %>% drop_na() %>% pull(zipcode) %>% factor()
+
+    df <- df %>%
       mutate(price = parse_number(price),
              zipcode = factor(zipcode)) %>%
       filter(price < 5000) %>%
       select(price,zipcode) %>%
       filter(zipcode == input$zipcode)
-    
+
     ggplot(data = df, aes_string(x = df$price)) +
       geom_density()
   })
